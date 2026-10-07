@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
+#include <EthernetUdp.h>
 
 
 
@@ -17,6 +18,9 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192, 168, 10, 1);
 IPAddress dns(8, 8, 8, 8);
 
+EthernetUDP Udp;                                                 // UDP
+const unsigned int UDP_PORT = 5000;
+char packetBuffer[256];
 
 
 void setup()
@@ -110,7 +114,54 @@ void setup()
     else
     {Serial.println("Ethernet link: UNKNOWN");}
 
+
+    Serial.println();                                                // Start UDP server
+    Serial.print("Starting UDP server on port ");
+    Serial.println(UDP_PORT);
+
+    Udp.begin(UDP_PORT);
+
+    Serial.println("UDP server started.");
+
+    Serial.println();
+    Serial.println("Waiting for UDP packets...");
+
 }
 void loop()
 {
+    int packetSize = Udp.parsePacket();
+    if (packetSize)
+    {
+        Serial.println();
+        Serial.println("================================");
+        Serial.println("UDP PACKET RECEIVED");
+        Serial.println("================================");
+
+        
+        int len = Udp.read(
+            packetBuffer,
+            sizeof(packetBuffer) - 1
+        );
+
+        if (len > 0)
+        {
+            packetBuffer[len] = '\0';
+        }
+
+        // Print sender information
+
+        Serial.print("Sender IP   : ");
+        Serial.println(Udp.remoteIP());
+
+        Serial.print("Sender Port : ");
+        Serial.println(Udp.remotePort());
+
+        Serial.print("Packet Size : ");
+        Serial.println(packetSize);
+
+        Serial.print("Data : ");
+        Serial.println(packetBuffer);
+
+        
+    }
 }

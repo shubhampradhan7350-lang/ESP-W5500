@@ -18,10 +18,60 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192, 168, 10, 1);
 IPAddress dns(8, 8, 8, 8);
 
+char packetBuff[256];
+unsigned long lastPacketTime = 0;
+const unsigned long COMMAND_TIMEOUT = 500;
+
 EthernetUDP Udp;                                                 // UDP
 const unsigned int UDP_PORT = 5000;
-char packetBuffer[256];
 
+void processCommand(char*command)
+{
+    Serial.print("Command received: ");
+    Serial.println(command);
+
+    if (command[0] == 'F')
+    {
+        int speed = atoi(command + 1);
+
+        Serial.print("FORWARD, speed = ");
+        Serial.println(speed);
+    }
+
+    else if (command[0] == 'B')
+    {
+        int speed = atoi(command + 1);
+
+        Serial.print("BACKWARD, speed = ");
+        Serial.println(speed);
+    }
+
+    else if (command[0] == 'L')
+    {
+        int speed = atoi(command + 1);
+
+        Serial.print("LEFT, speed = ");
+        Serial.println(speed);
+    }
+
+    else if (command[0] == 'R')
+    {
+        int speed = atoi(command + 1);
+
+        Serial.print("RIGHT, speed = ");
+        Serial.println(speed);
+    }
+
+    else if (command[0] == 'S')
+    {
+        Serial.println("STOP");
+    }
+
+    else
+    {
+        Serial.println("UNKNOWN COMMAND");
+    }
+}
 
 void setup()
 {
@@ -126,6 +176,10 @@ void setup()
     Serial.println();
     Serial.println("Waiting for UDP packets...");
 
+
+
+    
+
 }
 void loop()
 {
@@ -133,35 +187,38 @@ void loop()
     if (packetSize)
     {
         Serial.println();
-        Serial.println("================================");
         Serial.println("UDP PACKET RECEIVED");
-        Serial.println("================================");
-
         
         int len = Udp.read(
-            packetBuffer,
-            sizeof(packetBuffer) - 1
+            packetBuff,
+            sizeof(packetBuff) - 1
         );
-
         if (len > 0)
         {
-            packetBuffer[len] = '\0';
+            packetBuff[len] = '\0';
         }
 
-        // Print sender information
-
-        Serial.print("Sender IP   : ");
+        
+        Serial.print("Received from: ");
         Serial.println(Udp.remoteIP());
 
-        Serial.print("Sender Port : ");
-        Serial.println(Udp.remotePort());
+        Serial.print("Command: ");
+        Serial.println(packetBuff);
 
-        Serial.print("Packet Size : ");
-        Serial.println(packetSize);
+        // Process command
+        processCommand(packetBuff);
 
-        Serial.print("Data : ");
-        Serial.println(packetBuffer);
+        // Reset watchdog timer
+        lastPacketTime = millis();
+
+
+    if (millis() - lastPacketTime > COMMAND_TIMEOUT)                                    // LOOP PREVENTION
+    {
+        Serial.println("COMMUNICATION TIMEOUT - STOP");
+    }
 
         
     }
 }
+
+

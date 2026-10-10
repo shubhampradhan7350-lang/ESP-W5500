@@ -11,6 +11,13 @@
 #define SPI_MISO   19
 #define SPI_MOSI   23
 
+
+int Leftfront[]={13,12};                //{dir,pwm}
+int Rightfront[]={25,26};
+int Leftback[]={32,33};
+int Rightback[]={22,15};
+
+
 byte mac[] = {0xDE,0xAD,0xBE,0xEF,0xFE,0x01};                    // W5500 MAC ADDRESS
 
 IPAddress ip(192, 168, 10, 20);                                   // STATIC IP
@@ -25,6 +32,19 @@ const unsigned long COMMAND_TIMEOUT = 500;
 EthernetUDP Udp;                                                 // UDP
 const unsigned int UDP_PORT = 5000;
 
+void linear(int dir, int pwm){
+  digitalWrite(Leftfront[0],dir);                             // Motor Motion Control
+  digitalWrite(Rightfront[0],dir);
+  digitalWrite(Leftback[0],dir);
+  digitalWrite(Rightback[0],dir);
+
+  analogWrite(Leftfront[1],pwm);
+  analogWrite(Rightfront[1],pwm);
+  analogWrite(Leftback[1],pwm);
+  analogWrite(Rightback[1],pwm);
+
+}
+
 void processCommand(char*command)
 {
     Serial.print("Command received: ");
@@ -33,6 +53,7 @@ void processCommand(char*command)
     if (command[0] == 'F')
     {
         int speed = atoi(command + 1);
+        linear(1,speed);
 
         Serial.print("FORWARD, speed = ");
         Serial.println(speed);
@@ -41,6 +62,7 @@ void processCommand(char*command)
     else if (command[0] == 'B')
     {
         int speed = atoi(command + 1);
+        linear(0,speed);
 
         Serial.print("BACKWARD, speed = ");
         Serial.println(speed);
@@ -77,7 +99,7 @@ void setup()
 {
     Serial.begin(115200);                                         // Start Serial Monitor
 
-    delay(2000);
+    delay(1000);
 
     Serial.println();
   

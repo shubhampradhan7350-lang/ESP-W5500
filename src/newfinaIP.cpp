@@ -175,11 +175,6 @@ void setup()
 
     Serial.println();
     Serial.println("Waiting for UDP packets...");
-
-
-
-    
-
 }
 void loop()
 {
@@ -197,8 +192,6 @@ void loop()
         {
             packetBuff[len] = '\0';
         }
-
-        
         Serial.print("Received from: ");
         Serial.println(Udp.remoteIP());
 
@@ -207,18 +200,22 @@ void loop()
 
         // Process command
         processCommand(packetBuff);
+        delay(600);
 
-        // Reset watchdog timer
-        lastPacketTime = millis();
-
-
-    if (millis() - lastPacketTime > COMMAND_TIMEOUT)                                    // LOOP PREVENTION
-    {
-        Serial.println("COMMUNICATION TIMEOUT - STOP");
     }
-
-        
+    else{
+        processCommand(packetBuff);
+        delay(600);
     }
 }
 
 
+
+
+
+
+
+
+
+//Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+//& "C:\Users\SHUBHAM\OneDrive\Desktop\DTU CLG\INFERNO\rover_control.ps1"

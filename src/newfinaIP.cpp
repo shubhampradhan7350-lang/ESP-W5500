@@ -27,7 +27,7 @@ IPAddress dns(8, 8, 8, 8);
 
 char packetBuff[256];
 unsigned long lastPacketTime = 0;
-const unsigned long COMMAND_TIMEOUT = 500;
+const unsigned long COMMAND_TIMEOUT = 3600;
 
 EthernetUDP Udp;                                                 // UDP
 const unsigned int UDP_PORT = 5000;
@@ -202,7 +202,7 @@ void loop()
 {
     int packetSize = Udp.parsePacket();
     if (packetSize)
-    {
+    {   lastPacketTime = millis();
         Serial.println();
         Serial.println("UDP PACKET RECEIVED");
         
@@ -226,8 +226,14 @@ void loop()
 
     }
     else{
-        processCommand(packetBuff);
-        delay(600);
+        if (millis() - lastPacketTime > COMMAND_TIMEOUT){
+            Serial.println();
+            Serial.println("No command received for 3000ms. Motor stopped.");
+            linear(0,0);
+            delay(600);                               
+        }
+        else{processCommand(packetBuff);
+        delay(600);}
     }
 }
 

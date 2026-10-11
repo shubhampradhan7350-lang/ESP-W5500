@@ -12,7 +12,7 @@
 #define SPI_MOSI   23
 
 
-int Leftfront[]={13,12};                //{dir,pwm}
+int Leftfront[]={12,13};                //{dir,pwm}
 int Rightfront[]={25,26};
 int Leftback[]={32,33};
 int Rightback[]={22,15};
@@ -232,7 +232,7 @@ void loop()
             linear(0,0);
             delay(600);                               
         }
-        else{processCommand(packetBuff);
+       else{processCommand(packetBuff);
         delay(600);}
     }
 }

@@ -32,11 +32,14 @@ void linear(int dir, int pwm)
 {
 
     digitalWrite(Leftfront[0], dir); // Motor Motion Control
-
     digitalWrite(Rightfront[0], dir);
+    digitalWrite(Leftback[0], dir);
+    digitalWrite(Rightback[0], dir);
 
     analogWrite(Leftfront[1], pwm);
     analogWrite(Rightfront[1], pwm);
+    analogWrite(Leftback[1], pwm);
+    analogWrite(Rightback[1], pwm);
 
     Serial.print("DIR signal: ");
     Serial.println(dir == HIGH ? "HIGH" : "LOW");

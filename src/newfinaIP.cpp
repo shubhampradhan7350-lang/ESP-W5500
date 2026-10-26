@@ -9,6 +9,14 @@
 #define SPI_MISO 19
 #define SPI_MOSI 23
 
+#define ENCODER_A 34                //ENCD reading pins
+#define ENCODER_B 35
+
+int pulsecount;
+int PPR=12532;
+float lasttime=0;
+int rpm=0;
+
 int Leftfront[] = {12, 13}; //{dir,pwm}
 int Rightfront[] = {25, 26};
 int Leftback[] = {32, 33};
@@ -20,6 +28,8 @@ IPAddress ip(192, 168, 10, 20); // STATIC IP
 IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192, 168, 10, 1);
 IPAddress dns(8, 8, 8, 8);
+
+
 
 char packetBuff[256];
 unsigned long lastPacketTime = 0;
@@ -95,6 +105,25 @@ void processCommand(char *command) // While passing an array
     }
 }
 
+
+void  doEncoderA() {                                           //Functions to count the pulses from the encoder
+  if (digitalRead(ENCODER_A) == digitalRead(ENCODER_B)) {
+    pulsecount--;
+  } else {
+    pulsecount++;
+  }
+}
+
+void  doEncoderB() {
+  if (digitalRead(ENCODER_A) == digitalRead(ENCODER_B)) {
+    pulsecount++;
+  } else {
+    pulsecount--;
+  }
+}
+
+
+
 void setup()
 {
 
@@ -109,6 +138,10 @@ void setup()
     pinMode(Rightfront[1], OUTPUT);
     pinMode(Leftback[1], OUTPUT);
     pinMode(Rightback[1], OUTPUT);
+    pinMode(ENCODER_A, INPUT);
+    pinMode(ENCODER_B, INPUT);
+
+  
     delay(1000);
 
     // Motor Direction Control
@@ -217,6 +250,10 @@ void setup()
 
     Serial.println();
     Serial.println("Waiting for UDP packets...");
+
+                                                                         // Attach interrupts for EVERY CHANGE on both channels (4x decoding)
+  attachInterrupt(digitalPinToInterrupt(ENCODER_A), doEncoderA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), doEncoderB, CHANGE);
 }
 void loop()
 {
@@ -260,6 +297,18 @@ void loop()
             processCommand(packetBuff);
             delay(600);
         }
+    }
+
+    if(millis() - lasttime >= 1000)
+    {
+       float dt=(millis() - lasttime)/1000.0;
+
+       rpm=(pulsecount/(PPR*dt))*(60/dt);
+       lasttime=millis();
+       pulsecount=0;
+
+       Serial.print("  Actual RPM: ");
+       Serial.println(rpm);
     }
 }
 

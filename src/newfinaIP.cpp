@@ -29,6 +29,9 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress gateway(192, 168, 10, 1);
 IPAddress dns(8, 8, 8, 8);
 
+IPAddress laptopIP(192, 168, 1, 10);  // laptop IP
+const unsigned int laptopPort = 5001;
+
 
 
 char packetBuff[256];
@@ -120,6 +123,16 @@ void  doEncoderB() {
   } else {
     pulsecount--;
   }
+}
+
+void sendRPM(int rpm)
+{
+    Udp.beginPacket(laptopIP, laptopPort);
+
+    Udp.print("RPM:");
+    Udp.print(rpm, 2);
+
+    Udp.endPacket();
 }
 
 
@@ -303,7 +316,8 @@ void loop()
     {
        float dt=(millis() - lasttime)/1000.0;
 
-       rpm=(pulsecount/(PPR*dt))*(60/dt);
+       rpm=(pulsecount/(PPR*dt))*(15/dt);
+       sendRPM(rpm);
        lasttime=millis();
        pulsecount=0;
 
